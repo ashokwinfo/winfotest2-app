@@ -1,4 +1,5 @@
 from functools import lru_cache
+from urllib.parse import quote_plus
 from pydantic_settings import BaseSettings
 
 
@@ -23,7 +24,7 @@ class Settings(BaseSettings):
     @property
     def client_db_url(self) -> str:
         return (
-            f"postgresql+asyncpg://{self.CLIENT_DB_USER}:{self.CLIENT_DB_PASSWORD}"
+            f"postgresql+asyncpg://{quote_plus(self.CLIENT_DB_USER)}:{quote_plus(self.CLIENT_DB_PASSWORD)}"
             f"@{self.CLIENT_DB_HOST}:{self.CLIENT_DB_PORT}/{self.CLIENT_DB_NAME}"
             f"?ssl=disable"
         )
