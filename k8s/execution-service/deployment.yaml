@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: execution-service
-          image: lhr.ocir.io/axbvx18jvbzs/winfotest2.0/dev/execution-service:latest
+          image: lhr.ocir.io/nrch2emfoqis/winfotest2.0/dev/execution-service:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8003

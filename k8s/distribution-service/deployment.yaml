@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: distribution-service
-          image: lhr.ocir.io/axbvx18jvbzs/winfotest2.0/dev/distribution-service:latest
+          image: lhr.ocir.io/nrch2emfoqis/winfotest2.0/dev/distribution-service:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8002
