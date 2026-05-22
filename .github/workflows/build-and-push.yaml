@@ -19,6 +19,7 @@ jobs:
           - recording-service
           - distribution-service
           - execution-service
+          - frontend
 
     steps:
       - name: Checkout code
@@ -31,6 +32,10 @@ jobs:
       - name: Build and Push
         run: |
           IMAGE="$REGISTRY/$NAMESPACE/$REPO/${{ matrix.service }}"
-          docker build -t $IMAGE:latest -t $IMAGE:${{ github.sha }} -f backend/${{ matrix.service }}/Dockerfile backend/${{ matrix.service }}
+          if [ "${{ matrix.service }}" = "frontend" ]; then
+            docker build -t $IMAGE:latest -t $IMAGE:${{ github.sha }} -f frontend/Dockerfile frontend/
+          else
+            docker build -t $IMAGE:latest -t $IMAGE:${{ github.sha }} -f backend/${{ matrix.service }}/Dockerfile backend/${{ matrix.service }}
+          fi
           docker push $IMAGE:latest
           docker push $IMAGE:${{ github.sha }}
