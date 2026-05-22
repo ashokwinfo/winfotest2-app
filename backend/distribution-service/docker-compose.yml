@@ -1,0 +1,18 @@
+version: "3.9"
+services:
+  distribution-service:
+    build: .
+    container_name: ps_distribution
+    restart: unless-stopped
+    ports:
+      - "8002:8002"
+    env_file:
+      - envs/${APP_ENV:-dev}.env
+    extra_hosts:
+      - "host.docker.internal:172.25.112.1"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s

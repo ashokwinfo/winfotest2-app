@@ -1,0 +1,24 @@
+version: "3.9"
+services:
+  recording-service:
+    build: .
+    container_name: ps_recording
+    restart: unless-stopped
+    ports:
+      - "8001:8001"
+    env_file:
+      - envs/${APP_ENV:-dev}.env
+    environment:
+      # Required for non-headless Chrome to render on Windows desktop via WSLg
+      - DISPLAY=:0
+    volumes:
+      # X11 socket — WSLg creates this automatically on the Windows host
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    extra_hosts:
+      - "host.docker.internal:172.25.112.1"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s

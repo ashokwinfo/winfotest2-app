@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: distribution-service
+  namespace: argocd
+spec:
+  project: winfotest2-0-dev
+  source:
+    repoURL: https://github.com/ashokwinfo/winfotest2-app
+    targetRevision: main
+    path: k8s/distribution-service
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: winfotest-os
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

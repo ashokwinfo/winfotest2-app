@@ -1,0 +1,107 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: execution-service
+  namespace: winfotest-os
+  labels:
+    app: execution-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: execution-service
+  template:
+    metadata:
+      labels:
+        app: execution-service
+    spec:
+      containers:
+        - name: execution-service
+          image: lhr.ocir.io/axbvx18jvbzs/winfotest2.0/dev/execution-service:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8003
+          env:
+            - name: SERVICE_PORT
+              value: "8003"
+            - name: ENV
+              value: "development"
+            - name: CLIENT_DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: host
+            - name: CLIENT_DB_PORT
+              value: "5432"
+            - name: CLIENT_DB_NAME
+              value: playwright_client
+            - name: CLIENT_DB_USER
+              value: postgres
+            - name: CLIENT_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: password
+            - name: ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: encryption_key
+            - name: ORACLE_ERP_URL
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: oracle_erp_url
+            - name: BROWSER_HEADLESS
+              value: "true"
+            - name: BROWSER_SLOW_MO
+              value: "300"
+            - name: BROWSER_TIMEOUT
+              value: "30000"
+            - name: MAX_PARALLEL_WORKERS
+              value: "2"
+            - name: SCREENSHOT_MODE
+              value: "on_failure"
+            - name: DISPLAY
+              value: ":99"
+          resources:
+            requests:
+              cpu: 300m
+              memory: 512Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: execution-service
+  namespace: winfotest-os
+  labels:
+    app: execution-service
+spec:
+  selector:
+    app: execution-service
+  ports:
+    - name: http
+      port: 8003
+      targetPort: 8003
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: execution-service
+  namespace: winfotest-os
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: execution.dev.winfotest.internal
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: execution-service
+                port:
+                  number: 8003

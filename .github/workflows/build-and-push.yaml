@@ -1,0 +1,37 @@
+name: Build & Push Docker Images to OCIR
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  REGISTRY: lhr.ocir.io
+  NAMESPACE: axbvx18jvbzs
+  REPO: winfotest2.0/dev
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - recording-service
+          - distribution-service
+          - execution-service
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to OCIR
+        run: |
+          echo "${{ secrets.OCI_AUTH_TOKEN }}" | docker login $REGISTRY -u $NAMESPACE/ashokwinfo@gmail.com --password-stdin
+
+      - name: Build and Push
+        run: |
+          cd backend/${{ matrix.service }}
+          IMAGE="$REGISTRY/$NAMESPACE/$REPO/${{ matrix.service }}"
+          docker build -t $IMAGE:latest -t $IMAGE:${{ github.sha }} .
+          docker push $IMAGE:latest
+          docker push $IMAGE:${{ github.sha }}

@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+dist/
+build/
+.env
+envs/*.env
+!envs/*.env.example
+*.log
+.pytest_cache/
+.coverage
+.vscode/
+.idea/

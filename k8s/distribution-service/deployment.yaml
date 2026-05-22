@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: distribution-service
+  namespace: winfotest-os
+  labels:
+    app: distribution-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: distribution-service
+  template:
+    metadata:
+      labels:
+        app: distribution-service
+    spec:
+      containers:
+        - name: distribution-service
+          image: lhr.ocir.io/axbvx18jvbzs/winfotest2.0/dev/distribution-service:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8002
+          env:
+            - name: SERVICE_PORT
+              value: "8002"
+            - name: ENV
+              value: "development"
+            - name: CLIENT_DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: host
+            - name: CLIENT_DB_PORT
+              value: "5432"
+            - name: CLIENT_DB_NAME
+              value: playwright_client
+            - name: CLIENT_DB_USER
+              value: postgres
+            - name: CLIENT_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: password
+            - name: ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: encryption_key
+            - name: RECORDING_SERVICE_URL
+              value: http://recording-service:8001
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 300m
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: distribution-service
+  namespace: winfotest-os
+  labels:
+    app: distribution-service
+spec:
+  selector:
+    app: distribution-service
+  ports:
+    - name: http
+      port: 8002
+      targetPort: 8002
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: distribution-service
+  namespace: winfotest-os
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: distribution.dev.winfotest.internal
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: distribution-service
+                port:
+                  number: 8002
