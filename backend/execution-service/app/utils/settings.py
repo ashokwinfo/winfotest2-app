@@ -30,16 +30,6 @@ class Settings(BaseSettings):
     ENCRYPTION_KEY: str = ""
     SERVICE_PORT: int = 8003
 
-    # @property
-    # def client_db_url(self) -> str:
-    #     return (
-    #         f"postgresql+asyncpg://{self.CLIENT_DB_USER}:{self.CLIENT_DB_PASSWORD}"
-    #         f"@{self.CLIENT_DB_HOST}:{self.CLIENT_DB_PORT}/{self.CLIENT_DB_NAME}"
-    #         f"?ssl=disable"
-    #     )
-
-    from urllib.parse import quote_plus
-
     @property
     def client_db_url(self) -> str:
         return (
@@ -47,7 +37,6 @@ class Settings(BaseSettings):
             f"@{self.CLIENT_DB_HOST}:{self.CLIENT_DB_PORT}/{self.CLIENT_DB_NAME}"
             f"?ssl=disable"
         )
-    
 
     @property
     def viewport(self) -> dict:
