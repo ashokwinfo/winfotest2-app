@@ -7,7 +7,7 @@ on:
 
 env:
   REGISTRY: lhr.ocir.io
-  NAMESPACE: axbvx18jvbzs
+  NAMESPACE: nrch2emfoqis
   REPO: winfotest2.0/dev
 
 jobs:
