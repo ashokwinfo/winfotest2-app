@@ -15,6 +15,8 @@ spec:
       labels:
         app: recording-service
     spec:
+      imagePullSecrets:
+        - name: ocir-secret
       containers:
         - name: recording-service
           image: lhr.ocir.io/nrch2emfoqis/winfotest2.0/dev/recording-service:latest
