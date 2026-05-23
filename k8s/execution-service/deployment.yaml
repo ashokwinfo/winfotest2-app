@@ -17,12 +17,20 @@ spec:
     spec:
       imagePullSecrets:
         - name: ocir-secret
+      volumes:
+        - name: settings-override
+          configMap:
+            name: execution-service-settings
       containers:
         - name: execution-service
           image: lhr.ocir.io/nrch2emfoqis/winfotest2.0/dev/execution-service:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8003
+          volumeMounts:
+            - name: settings-override
+              mountPath: /app/app/utils/settings.py
+              subPath: settings.py
           env:
             - name: SERVICE_PORT
               value: "8003"
@@ -101,6 +109,16 @@ spec:
   ingressClassName: nginx
   rules:
     - host: execution.dev.winfotest.internal
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: execution-service
+                port:
+                  number: 8003
+    - host: execution.130.162.178.72.nip.io
       http:
         paths:
           - path: /

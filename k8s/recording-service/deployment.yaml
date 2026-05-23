@@ -17,12 +17,20 @@ spec:
     spec:
       imagePullSecrets:
         - name: ocir-secret
+      volumes:
+        - name: settings-override
+          configMap:
+            name: recording-service-settings
       containers:
         - name: recording-service
           image: lhr.ocir.io/nrch2emfoqis/winfotest2.0/dev/recording-service:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8001
+          volumeMounts:
+            - name: settings-override
+              mountPath: /app/app/utils/settings.py
+              subPath: settings.py
           env:
             - name: SERVICE_PORT
               value: "8001"
@@ -91,6 +99,16 @@ spec:
   ingressClassName: nginx
   rules:
     - host: recording.dev.winfotest.internal
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: recording-service
+                port:
+                  number: 8001
+    - host: recording.130.162.178.72.nip.io
       http:
         paths:
           - path: /
