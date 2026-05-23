@@ -64,7 +64,7 @@ spec:
                 name: frontend
                 port:
                   number: 80
-    - host: 130-162-178-72.nip.io
+    - host: 130.162.178.72.nip.io
       http:
         paths:
           - path: /
