@@ -1,0 +1,41 @@
+name: Build & Push Docker Images to OCIR
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  REGISTRY: lhr.ocir.io
+  NAMESPACE: nrch2emfoqis
+  REPO: winfotest2.0/dev
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - recording-service
+          - distribution-service
+          - execution-service
+          - frontend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to OCIR
+        run: |
+          echo "${{ secrets.OCI_AUTH_TOKEN }}" | docker login $REGISTRY -u $NAMESPACE/oracleidentitycloudservice/ashokkumar.gogineni@winfosolutions.com --password-stdin
+
+      - name: Build and Push
+        run: |
+          IMAGE="$REGISTRY/$NAMESPACE/$REPO/${{ matrix.service }}"
+          if [ "${{ matrix.service }}" = "frontend" ]; then
+            docker build -t $IMAGE:latest -t $IMAGE:${{ github.sha }} -f frontend/Dockerfile frontend/
+          else
+            docker build -t $IMAGE:latest -t $IMAGE:${{ github.sha }} -f backend/${{ matrix.service }}/Dockerfile backend/${{ matrix.service }}
+          fi
+          docker push $IMAGE:latest
+          docker push $IMAGE:${{ github.sha }}

@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: frontend
+  namespace: argocd
+spec:
+  project: winfotest2-0-dev
+  source:
+    repoURL: https://github.com/WinfoSolutions/winfotest2.0
+    targetRevision: main
+    path: k8s/frontend
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: winfotest-os
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

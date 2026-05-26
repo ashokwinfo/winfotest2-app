@@ -1,0 +1,120 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: recording-service
+  namespace: winfotest-os
+  labels:
+    app: recording-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: recording-service
+  template:
+    metadata:
+      labels:
+        app: recording-service
+    spec:
+      imagePullSecrets:
+        - name: ocir-secret
+      volumes:
+        - name: settings-override
+          configMap:
+            name: recording-service-settings
+      containers:
+        - name: recording-service
+          image: lhr.ocir.io/nrch2emfoqis/winfotest2.0/dev/recording-service:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8001
+          volumeMounts:
+            - name: settings-override
+              mountPath: /app/app/utils/settings.py
+              subPath: settings.py
+          env:
+            - name: SERVICE_PORT
+              value: "8001"
+            - name: ENV
+              value: "development"
+            - name: MASTER_DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: host
+            - name: MASTER_DB_PORT
+              value: "5432"
+            - name: MASTER_DB_NAME
+              value: playwright_master
+            - name: MASTER_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: user
+            - name: MASTER_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: password
+            - name: ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: encryption_key
+            - name: ORACLE_ERP_URL
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: oracle_erp_url
+            - name: BROWSER_HEADLESS
+              value: "true"
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: recording-service
+  namespace: winfotest-os
+  labels:
+    app: recording-service
+spec:
+  selector:
+    app: recording-service
+  ports:
+    - name: http
+      port: 8001
+      targetPort: 8001
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: recording-service
+  namespace: winfotest-os
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: recording.dev.winfotest.internal
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: recording-service
+                port:
+                  number: 8001
+    - host: recording.130.162.178.72.nip.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: recording-service
+                port:
+                  number: 8001
