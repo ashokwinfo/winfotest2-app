@@ -77,6 +77,12 @@ spec:
               value: "on_failure"
             - name: DISPLAY
               value: ":99"
+            - name: KAFKA_ENABLED
+              value: "true"
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: "winfotest-kafka-kafka-bootstrap.winfotest-os.svc:9092"
+            - name: KAFKA_CONSUMER_GROUP_ID
+              value: "execution-workers"
           resources:
             requests:
               cpu: 300m
